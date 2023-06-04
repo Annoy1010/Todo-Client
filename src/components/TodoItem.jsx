@@ -9,9 +9,12 @@ import {
 } from "mdb-react-ui-kit";
 import axios from 'axios';
 import { useEffect, useState } from "react";
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+
+import ToastMessage from '../components/ToastMessage'
 
 const API_URL = 'http://localhost:8080'
-
 
 const TodoItem = ({ todo, getAllTodo, todos }) => {
     const completedState = todo.is_completed.data[0] === 1 ? true : false;
@@ -42,12 +45,12 @@ const TodoItem = ({ todo, getAllTodo, todos }) => {
         })
         .then(res => {
             if (res.data.statusCode !== 200) {
-                alert(res.data.responseData)
+                toast.warn(res.data.responseData)
             } else {
                 getAllTodo();
             }
         })
-        .catch(err => alert(err))
+        .catch(err => toast.error(err))
     }
 
     useEffect(() => {
@@ -66,10 +69,10 @@ const TodoItem = ({ todo, getAllTodo, todos }) => {
             if (res.data.statusCode === 200) {
                 getAllTodo();
             } else {
-                alert(res.data.responseData)
+                toast.warn(res.data.responseData)
             }
         })
-        .catch(err => alert(err))
+        .catch(err => toast.error(err))
     }
 
     const formatDateToDisplay = date => {
@@ -168,12 +171,11 @@ const TodoItem = ({ todo, getAllTodo, todos }) => {
                                     />
                                 </MDBTooltip>
                             </div>
-                            
                         )
                     }
-                   
                 </div>
             </MDBListGroupItem>
+            <ToastMessage/>
         </MDBListGroup>
     )
 }

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,10 +13,14 @@ import {
     MDBIcon,
     MDBRow,
 } from "mdb-react-ui-kit";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Loading from '../components/Loading'
 import TodoItem from '../components/TodoItem'
+import ToastMessage from '../components/ToastMessage'
 
 const API_URL = 'http://localhost:8080'
 
@@ -41,6 +45,7 @@ const Home = () => {
     const [todos, setTodos] = useState([]);
     const [loaded, setLoaded] = useState(false);
     const [chosedOption, setChosedOption] = useState(0)
+    const [clickedMenu, setClickedMenu] = useState(false);
 
     const formatDateToSaveIntoDB = date => {
         const convertedDate = new Date(Date.parse(date));
@@ -56,7 +61,7 @@ const Home = () => {
                 dispatch(setUser(res.data[0]))
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => alert(err))
     }
 
     const getAllTodo = async () => {
@@ -71,11 +76,10 @@ const Home = () => {
         })
         .then(res => {
             if (res.data.statusCode === 200) {
-                console.log('res todos: ', res.data.responseData)
                 setTodos(res.data.responseData)
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => alert(err))
     }
 
     useEffect(() => {
@@ -86,16 +90,10 @@ const Home = () => {
             setLoaded(true);
         }
     }, [user, chosedOption])
-    
-    // useEffect(() => {
-    //     if (Object.keys(user).length > 0) {
-    //         getAllTodo()
-    //     }
-    // }, [chosedOption])
 
     const handleAddTodo = async () => {
         if (formatDateToSaveIntoDB(deadline) === 'NaN/NaN/NaN') {
-            alert('Please set deadline for this work')
+            toast.warn('Please set deadline for this work')
         } else {
             await axios.post(`${API_URL}/api/todo/new`, {
                 profile_id: user.id,
@@ -108,14 +106,31 @@ const Home = () => {
                     setDeadline('');
                     setTodo('');
                 } else {
-                    alert(res.data.responseData);
+                    toast.warn(res.data.responseData);
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => toast.error(err))
         }
     }
 
-    return <div 
+    const handleSignOut = async () => {
+        await axios.put(`${API_URL}/api/user/signout`)
+        .then(res => {
+            const notify = res.data.responseData;
+            if (res.data.statusCode === 200) {
+                toast.success(notify);
+                setTimeout(() => {
+                    dispatch(setUser({}));
+                }, 2000)
+            } else {
+                toast.warn(notify);
+            }
+        })
+        .catch(err => toast.error(err))
+    }
+
+    return (
+        <div 
                 className='home_container' 
                 style={{
                     minHeight: '100vh',
@@ -208,7 +223,41 @@ const Home = () => {
                         </MDBContainer>
                     ) : <Loading />
                 }
-    </div>
+                <div className='menu' style={{
+                    width: clickedMenu ? '300px' : '40px'
+                }}>
+                    <FontAwesomeIcon icon={faBars} size='xl' className="menu-icon" onClick={() => setClickedMenu(prev => !prev)}/>
+                    {
+                        clickedMenu && <React.Fragment>
+                             <div className='menu-item' style={{
+                                marginTop: '50px',
+                                borderTop: '1px solid #efefef',
+                                
+                            }}
+                            >
+                                <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    marginRight: '20px',
+                                }}>
+                                    <img src="https://img.freepik.com/free-icon/user_318-180888.jpg" alt="" style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain'
+                                    }}/>
+                                </div>
+                                <span>{user.full_name}</span>
+                            </div>
+                            <div className='menu-item' onClick={handleSignOut}> 
+                                Đăng xuất
+                            </div>
+                        </React.Fragment>
+                    }
+                   
+                </div>
+            <ToastMessage/>
+        </div>
+    )
 }
 
 export default Home;
