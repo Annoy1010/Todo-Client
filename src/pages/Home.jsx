@@ -22,8 +22,8 @@ import Loading from '../components/Loading'
 import TodoItem from '../components/TodoItem'
 import ToastMessage from '../components/ToastMessage'
 
-// const API_URL = 'https://todo-server-gfv3.vercel.app'
-const API_URL = 'http://localhost:8080'
+const API_URL = 'https://todo-server-gfv3.vercel.app'
+// const API_URL = 'http://localhost:8080'
 
 const options = [
     'All',

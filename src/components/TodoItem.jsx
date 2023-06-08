@@ -14,8 +14,8 @@ import { toast } from 'react-toastify';
 
 import ToastMessage from '../components/ToastMessage'
 
-// const API_URL = 'https://todo-server-gfv3.vercel.app'
-const API_URL = 'http://localhost:8080'
+const API_URL = 'https://todo-server-gfv3.vercel.app'
+// const API_URL = 'http://localhost:8080'
 
 
 const TodoItem = ({ todo, getAllTodo, todos, setTodos }) => {
