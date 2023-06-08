@@ -22,7 +22,8 @@ import Loading from '../components/Loading'
 import TodoItem from '../components/TodoItem'
 import ToastMessage from '../components/ToastMessage'
 
-const API_URL = 'https://todo-server-gfv3.vercel.app'
+// const API_URL = 'https://todo-server-gfv3.vercel.app'
+const API_URL = 'http://localhost:8080'
 
 const options = [
     'All',
@@ -44,6 +45,8 @@ const Home = () => {
     const [deadline, setDeadline] = useState('');
     const [todos, setTodos] = useState([]);
     const [loaded, setLoaded] = useState(false);
+    const [searchInput, setSearchInput] = useState('');
+    const [sentSearch, setSentSearch] = useState('');
     const [chosedOption, setChosedOption] = useState(0)
     const [clickedMenu, setClickedMenu] = useState(false);
 
@@ -68,6 +71,7 @@ const Home = () => {
         await axios.get(`${API_URL}/api/todo/all`, {
             params: {
                 profile_id: user.id,
+                search_input: sentSearch,
                 all: chosedOption === ALL ? true : false,
                 active: chosedOption === ACTIVE ? true : false,
                 completed: chosedOption === COMPLETED ? true : false,
@@ -89,7 +93,7 @@ const Home = () => {
             getAllTodo()
             setLoaded(true);
         }
-    }, [user, chosedOption])
+    }, [user, chosedOption, sentSearch])
 
     const handleAddTodo = async () => {
         if (formatDateToSaveIntoDB(deadline) === 'NaN/NaN/NaN') {
@@ -102,9 +106,10 @@ const Home = () => {
             })
             .then(res => {
                 if (res.data.statusCode === 200) {
-                    getAllTodo();
                     setDeadline('');
                     setTodo('');
+                    setTodos([])
+                    getAllTodo();
                 } else {
                     toast.warn(res.data.responseData);
                 }
@@ -112,6 +117,22 @@ const Home = () => {
             .catch(err => toast.error(err))
         }
     }
+
+    useEffect(() => { 
+        setTimeout(() => {
+            setSentSearch(searchInput)
+        }, 2000)
+    }, [searchInput])
+
+    const handleSearch = () => {
+        setSentSearch(searchInput)
+    }
+
+    const handleClear = () => {
+        setSearchInput('')
+        setSentSearch('')
+    }
+
 
     const handleSignOut = async () => {
         await axios.put(`${API_URL}/api/user/signout`)
@@ -176,8 +197,34 @@ const Home = () => {
                                                             <MDBBtn onClick={handleAddTodo}>Add</MDBBtn>
                                                         </div>
                                                     </div>
-                                                </MDBCardBody>
+                                                </MDBCardBody>  
+                                                <MDBCardBody>
+                                                    <div className="d-flex flex-row align-items-center">
+                                                        <input
+                                                            type="text"
+                                                            value={searchInput}
+                                                            className="form-control form-control-lg"
+                                                            id="exampleFormControlInput1"
+                                                            placeholder="Search Todo"
+                                                            onChange={(e) => setSearchInput(e.target.value)}
+                                                        />
+                                                        <div>
+                                                            <MDBBtn onClick={handleSearch} style={{
+                                                                marginLeft: '30px',
+                                                            }}>Search</MDBBtn>
+                                                        </div>
+                                                        <div>
+                                                            <MDBBtn onClick={handleClear} style={{
+                                                                marginLeft: '30px',
+                                                                backgroundColor: '#FA5F55'
+                                                            }}>Clear</MDBBtn>
+                                                        </div>
+                                                    </div>
+                                                </MDBCardBody>                                                              
                                             </MDBCard>
+                                            {/* <MDBCard>
+                                                
+                                            </MDBCard> */}
                                         </div>
                                         <hr className="my-4" />
 
@@ -211,6 +258,7 @@ const Home = () => {
                                                         todo={todo} 
                                                         key={index} 
                                                         getAllTodo={getAllTodo}
+                                                        setTodos={setTodos}
                                                         todos={todos}
                                                     />)
                                                 )
