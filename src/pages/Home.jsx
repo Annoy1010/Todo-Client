@@ -90,6 +90,7 @@ const Home = () => {
         if (Object.keys(user).length === 0) {
             handleLoginedUser();
         } else {
+            setTodos([])
             getAllTodo()
             setLoaded(true);
         }
